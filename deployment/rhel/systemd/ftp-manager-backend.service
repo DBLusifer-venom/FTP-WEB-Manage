@@ -1,0 +1,31 @@
+[Unit]
+Description=FTP Manager Backend API
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=exec
+User=ftpmanager
+Group=ftpmanager
+WorkingDirectory=/opt/ftp-manager/backend
+Environment=PATH=/opt/ftp-manager/venv/bin
+EnvironmentFile=-/opt/ftp-manager/.env
+ExecStart=/opt/ftp-manager/venv/bin/gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120 --keep-alive 5 --max-requests 1000 --max-requests-jitter 50
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ftp-manager-backend
+
+# Security
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/ftp-manager /var/log/ftp-manager /etc/vsftpd /etc/ssl/ftpmanager
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

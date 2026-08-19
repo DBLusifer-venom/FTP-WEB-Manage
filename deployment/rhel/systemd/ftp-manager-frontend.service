@@ -1,0 +1,13 @@
+[Unit]
+Description=FTP Manager Frontend (Nginx)
+After=network.target nginx.service
+Wants=nginx.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecReload=/usr/bin/systemctl reload nginx
+
+[Install]
+WantedBy=multi-user.target
